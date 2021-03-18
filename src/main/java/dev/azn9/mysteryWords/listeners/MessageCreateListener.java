@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 public class MessageCreateListener {
 
     public <R> Publisher<? extends R> accept(MessageCreateEvent messageCreateEvent) {
-        //TODO
+
 
         return Mono.empty();
     }

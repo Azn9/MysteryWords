@@ -9,7 +9,6 @@ public class ReadyListener {
     public <R> Publisher<? extends R> accept(ReadyEvent readyEvent) {
 
 
-
         return Mono.empty();
     }
 }

@@ -24,4 +24,23 @@ public class Configuration {
         this.leaderboardType = leaderboardType;
     }
 
+    public Long getGuildId() {
+        return this.guildId;
+    }
+
+    public long getChannelId() {
+        return this.channelId;
+    }
+
+    public String getLocale() {
+        return this.locale;
+    }
+
+    public boolean isLeaderboardEnabled() {
+        return this.leaderboardEnabled;
+    }
+
+    public String getLeaderboardType() {
+        return this.leaderboardType;
+    }
 }

@@ -3,6 +3,7 @@ package dev.azn9.mysteryWords;
 import dev.azn9.mysteryWords.services.CacheService;
 import dev.azn9.mysteryWords.services.DatabaseService;
 import dev.azn9.mysteryWords.services.EventService;
+import dev.azn9.mysteryWords.services.I18nService;
 import discord4j.core.DiscordClient;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonReactiveClient;
@@ -11,9 +12,14 @@ import org.redisson.config.Config;
 public class Main {
 
     private static CacheService cacheService;
+    private static I18nService  i18nService;
 
     public static void main(String[] args) {
         try {
+            i18nService = new I18nService();
+
+            assert i18nService.setupLocales() : "An error occured while loading the translations !";
+
             String discordToken = System.getenv("DISCORD_TOKEN");
             String databaseHost = System.getenv("DATABASE_HOST");
             String databaseName = System.getenv("DATABASE_NAME");
@@ -58,4 +64,7 @@ public class Main {
         return cacheService;
     }
 
+    public static I18nService getI18nService() {
+        return i18nService;
+    }
 }
