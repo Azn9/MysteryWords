@@ -1,5 +1,6 @@
 package dev.azn9.mysteryWords;
 
+import dev.azn9.mysteryWords.injector.Injector;
 import dev.azn9.mysteryWords.services.CacheService;
 import dev.azn9.mysteryWords.services.DatabaseService;
 import dev.azn9.mysteryWords.services.EventService;
@@ -11,14 +12,13 @@ import org.redisson.config.Config;
 
 public class Main {
 
-    private static CacheService cacheService;
-    private static I18nService  i18nService;
-
     public static void main(String[] args) {
         try {
-            i18nService = new I18nService();
+            Injector injector = new Injector();
 
+            I18nService i18nService = new I18nService();
             assert i18nService.setupLocales() : "An error occured while loading the translations !";
+            injector.registerInjection(i18nService);
 
             String discordToken = System.getenv("DISCORD_TOKEN");
             String databaseHost = System.getenv("DATABASE_HOST");
@@ -27,32 +27,37 @@ public class Main {
             String databasePass = System.getenv("DATABASE_PASS");
             String redisUrl = System.getenv("REDIS_URL");
 
-            assert discordToken != null : "You didn't provide the discord bot token !";
-            assert databaseHost != null : "You didn't provide the database host url !";
-            assert databaseName != null : "You didn't provide the database name !";
-            assert databaseUser != null : "You didn't provide the database user !";
+            assert discordToken != null && !discordToken.isEmpty() : "You didn't provide the discord bot token !";
+            assert databaseHost != null && !databaseHost.isEmpty() : "You didn't provide the database host url !";
+            assert databaseName != null && !databaseName.isEmpty() : "You didn't provide the database name !";
+            assert databaseUser != null && !databaseUser.isEmpty() : "You didn't provide the database user !";
             assert databasePass != null : "You didn't provide the database password !";
-            assert redisUrl != null : "You didn't provide the redis url !";
+            assert redisUrl != null && !redisUrl.isEmpty() : "You didn't provide the redis url !";
 
             DatabaseService databaseService = new DatabaseService(databaseHost, databaseName, databaseUser, databasePass);
-
             assert databaseService.getConnection() != null : "An error occurred while attempting to connect to the database !";
+            injector.registerInjection(databaseService);
 
             Config config = new Config();
             config.useSingleServer().setAddress(redisUrl);
             RedissonReactiveClient redissonReactive = Redisson.createReactive(config);
-
             assert redissonReactive != null : "An error occurred while attempting to connect to the redis server !";
+            injector.registerInjection(redissonReactive);
 
-            cacheService = new CacheService(redissonReactive, databaseService);
+            CacheService cacheService = new CacheService();
+            injector.registerInjection(cacheService);
 
             DiscordClient discordClient = DiscordClient.create(discordToken);
+            injector.registerInjection(discordClient);
 
             discordClient.withGateway(gateway -> {
-                EventService eventService = new EventService(gateway);
+                injector.registerInjection(gateway);
+
+                injector.startInjection();
+
+                EventService eventService = new EventService();
                 return eventService.initializeEventListeners();
             }).block();
-
         } catch (Exception exception) {
             exception.printStackTrace();
 
@@ -60,11 +65,4 @@ public class Main {
         }
     }
 
-    public static CacheService getCacheService() {
-        return cacheService;
-    }
-
-    public static I18nService getI18nService() {
-        return i18nService;
-    }
 }

@@ -10,6 +10,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Locale;
 import reactor.core.publisher.Mono;
 
 public class DatabaseService {
@@ -78,13 +79,15 @@ public class DatabaseService {
                 if (this.connection == null || this.connection.isClosed())
                     sink.error(new IllegalStateException());
 
-                PreparedStatement preparedStatement = this.connection.prepareStatement("SELECT * FROM ?.server_settings WHERE GUILD_ID = ?");
-                preparedStatement.setString(1, this.databaseName);
-                preparedStatement.setLong(2, guildId);
+                PreparedStatement preparedStatement = this.connection.prepareStatement("SELECT * FROM server_settings WHERE GUILD_ID = ?");
+                preparedStatement.setLong(1, guildId);
+
                 ResultSet resultSet = preparedStatement.executeQuery();
 
                 if (resultSet.next())
-                    sink.success(new Configuration(guildId, resultSet.getLong("CHANNEL_ID"), resultSet.getString("LOCALE"), resultSet.getBoolean("LEADERBOARD_ENABLED"), resultSet.getString("LEADERBOARD_TYPE")));
+                    sink.success(new Configuration(guildId, resultSet.getLong("CHANNEL_ID"), Locale.forLanguageTag(resultSet.getString("LOCALE")), resultSet.getBoolean("LEADERBOARD_ENABLED"), resultSet.getString("LEADERBOARD_TYPE")));
+                else
+                    sink.success(new Configuration(0L));
             } catch (SQLException | IOException exception) {
                 sink.error(exception);
             }

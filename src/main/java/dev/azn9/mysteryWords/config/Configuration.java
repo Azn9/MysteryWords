@@ -1,12 +1,17 @@
 package dev.azn9.mysteryWords.config;
 
+import java.util.Locale;
+
 public class Configuration {
 
-    private Long    guildId;
-    private long    channelId;
-    private String  locale;
-    private boolean leaderboardEnabled;
-    private String  leaderboardType;
+    private transient Locale locale;
+
+    private Long    guildId            = 0L;
+    private Long    channelId          = 0L;
+    private String  localeTag          = "fr";
+    private boolean leaderboardEnabled = true;
+    private String  leaderboardType    = "top_all";
+    private String  currentWord        = ""; //TODO
 
     public Configuration() {
 
@@ -14,12 +19,15 @@ public class Configuration {
 
     public Configuration(Long guildId) {
         this.guildId = guildId;
+        this.locale = Locale.FRENCH;
+        this.localeTag = "fr";
     }
 
-    public Configuration(Long guildId, long channelId, String locale, boolean leaderboardEnabled, String leaderboardType) {
+    public Configuration(Long guildId, long channelId, Locale locale, boolean leaderboardEnabled, String leaderboardType) {
         this.guildId = guildId;
         this.channelId = channelId;
         this.locale = locale;
+        this.localeTag = locale.toLanguageTag();
         this.leaderboardEnabled = leaderboardEnabled;
         this.leaderboardType = leaderboardType;
     }
@@ -32,7 +40,10 @@ public class Configuration {
         return this.channelId;
     }
 
-    public String getLocale() {
+    public Locale getLocale() {
+        if (this.locale == null)
+            this.locale = Locale.forLanguageTag(this.localeTag);
+
         return this.locale;
     }
 
@@ -42,5 +53,17 @@ public class Configuration {
 
     public String getLeaderboardType() {
         return this.leaderboardType;
+    }
+
+    public String getCurrentWord() {
+        return this.currentWord;
+    }
+
+    public void setCurrentWord(String currentWord) {
+        this.currentWord = currentWord;
+    }
+
+    public String getLocaleTag() {
+        return this.localeTag;
     }
 }
