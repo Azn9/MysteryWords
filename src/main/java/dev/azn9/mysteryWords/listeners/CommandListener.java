@@ -26,7 +26,7 @@ public class CommandListener {
     public Mono<Object> accept(MessageCreateEvent messageCreateEvent) {
         Message message = messageCreateEvent.getMessage();
 
-        if (message.getGuildId().isEmpty())
+        if (!message.getGuildId().isPresent())
             return Mono.empty();
 
         if (message.getContent().equalsIgnoreCase("/settings") || message.getContent().equalsIgnoreCase("/parametres"))
@@ -49,9 +49,7 @@ public class CommandListener {
                                     return Mono.just(messages.getString("channel_not_set"));
                             }).flatMap(gameChannel -> message.getChannel().flatMap(messageChannel ->
                                     messageChannel.createEmbed(embedCreateSpec -> settingsMainPage(embedCreateSpec, messages, configuration, gameChannel))
-                                            .flatMap(message1 ->
-                                                    message1.addReaction(ReactionEmoji.unicode("\uD83C\uDDE6")).flatMap(unused ->
-                                                            message1.addReaction(ReactionEmoji.unicode("#️⃣"))))));
+                                            .flatMap(message1 -> message1.addReaction(ReactionEmoji.unicode(configuration.getFlagTag())).then(message1.addReaction(ReactionEmoji.unicode("\uD83D\uDCAC"))))));
                         } else {
                             return message.getChannel().flatMap(messageChannel ->
                                     messageChannel.createEmbed(embedCreateSpec -> {
@@ -73,8 +71,8 @@ public class CommandListener {
 
         embedCreateSpec.setDescription(messages.getString("setup_embed_description"));
 
-        embedCreateSpec.addField(":regional_indicator_a: " + messages.getString("setup_embed_field_lang"), localeName, false);
-        embedCreateSpec.addField(":hash: " + messages.getString("setup_embed_field_channel"), gameChannel, false);
+        embedCreateSpec.addField(":flag_" + configuration.getLocaleTag() + ": " + messages.getString("setup_embed_field_lang"), localeName, false);
+        embedCreateSpec.addField(":speech_balloon: " + messages.getString("setup_embed_field_channel"), gameChannel, false);
 
         embedCreateSpec.addField(":hourglass: " + messages.getString("setup_embed_field_soon_title"), messages.getString("setup_embed_field_soon_description"), false);
     }

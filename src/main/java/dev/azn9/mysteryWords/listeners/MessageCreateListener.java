@@ -15,7 +15,7 @@ public class MessageCreateListener {
     public Mono<Object> accept(MessageCreateEvent messageCreateEvent) {
         Message message = messageCreateEvent.getMessage();
 
-        if (message.getGuildId().isEmpty())
+        if (!message.getGuildId().isPresent())
             return Mono.empty();
 
         return cacheService.getGuildConfiguration(message.getGuildId().get().asLong()).flatMap(configuration -> {
@@ -52,7 +52,8 @@ public class MessageCreateListener {
             index++;
         }
 
-        resultMessage2.append(":white_circle: ".repeat(Math.max(0, realWord.length() - resultMessage2.length())));
+        for (int i = 0; i < realWord.length() - resultMessage2.length(); i++)
+            resultMessage2.append(":white_circle: ");
 
         return message.getChannel().flatMap(messageChannel -> messageChannel.createMessage(resultMessage.toString() + "\n" + resultMessage2.toString()).flatMap(message1 -> message.delete()));
     }

@@ -30,11 +30,11 @@ public class EventService {
                 gateway.on(GuildCreateEvent.class).flatMap(guildCreateListener::accept),
 
                 gateway.on(ReactionAddEvent.class).flatMap(reactionAddEvent -> {
-                    if (reactionAddEvent.getMember().isEmpty() || reactionAddEvent.getMember().get().isBot())
+                    if (!reactionAddEvent.getMember().isPresent() || reactionAddEvent.getMember().get().isBot())
                         return Mono.empty();
                     else
                         return reactionAddEvent.getMessage().flatMap(message -> {
-                            if (message.getAuthor().isEmpty() || !message.getAuthor().get().getId().equals(gateway.getSelfId()))
+                            if (!message.getAuthor().isPresent() || !message.getAuthor().get().getId().equals(gateway.getSelfId()))
                                 return Mono.empty();
                             else
                                 return reactionListener.accept(reactionAddEvent);
@@ -42,7 +42,7 @@ public class EventService {
                 }),
 
                 gateway.on(MessageCreateEvent.class).flatMap(messageCreateEvent -> {
-                    if (messageCreateEvent.getMessage().getAuthor().isEmpty() || messageCreateEvent.getMessage().getAuthor().get().isBot())
+                    if (!messageCreateEvent.getMessage().getAuthor().isPresent() || messageCreateEvent.getMessage().getAuthor().get().isBot())
                         return Mono.empty();
 
                     if (messageCreateEvent.getMessage().getContent().startsWith("/"))

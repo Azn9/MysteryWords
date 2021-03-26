@@ -1,6 +1,7 @@
 package dev.azn9.mysteryWords.config;
 
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public class Configuration {
 
@@ -9,6 +10,7 @@ public class Configuration {
     private Long    guildId            = 0L;
     private Long    channelId          = 0L;
     private String  localeTag          = "fr";
+    private String  flagTag            = "";
     private boolean leaderboardEnabled = true;
     private String  leaderboardType    = "top_all";
     private String  currentWord        = ""; //TODO
@@ -20,7 +22,8 @@ public class Configuration {
     public Configuration(Long guildId) {
         this.guildId = guildId;
         this.locale = Locale.FRENCH;
-        this.localeTag = "fr";
+        this.localeTag = this.locale.toLanguageTag();
+        this.flagTag = this.localeTag.chars().map(i -> i - 96 + 56805).mapToObj(s -> "\uD83C" + (char) s).collect(Collectors.joining());
     }
 
     public Configuration(Long guildId, long channelId, Locale locale, boolean leaderboardEnabled, String leaderboardType) {
@@ -28,6 +31,7 @@ public class Configuration {
         this.channelId = channelId;
         this.locale = locale;
         this.localeTag = locale.toLanguageTag();
+        this.flagTag = this.localeTag.chars().map(i -> i - 96 + 56805).mapToObj(s -> "\uD83C" + (char) s).collect(Collectors.joining());
         this.leaderboardEnabled = leaderboardEnabled;
         this.leaderboardType = leaderboardType;
     }
@@ -65,5 +69,9 @@ public class Configuration {
 
     public String getLocaleTag() {
         return this.localeTag;
+    }
+
+    public String getFlagTag() {
+        return this.flagTag;
     }
 }
